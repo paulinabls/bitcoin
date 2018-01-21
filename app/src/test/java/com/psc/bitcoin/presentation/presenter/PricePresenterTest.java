@@ -3,6 +3,7 @@ package com.psc.bitcoin.presentation.presenter;
 import com.psc.bitcoin.data.SchedulerProvider;
 import com.psc.bitcoin.domain.model.Price;
 import com.psc.bitcoin.domain.usecase.FetchPricesUseCase;
+import com.psc.bitcoin.domain.usecase.FilterChartDataUseCase;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -34,13 +35,17 @@ public class PricePresenterTest {
     private PriceView view;
 
     @Mock
+    private FilterChartDataUseCase filterDataUseCase;
+
+    @Mock
     SchedulerProvider schedulerProvider;
+
     private PricePresenter tested;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        tested = new PricePresenter(fetchPricesUseCase, schedulerProvider);
+        tested = new PricePresenter(fetchPricesUseCase, filterDataUseCase, schedulerProvider);
         when(fetchPricesUseCase.execute(null)).thenReturn(OBSERVABLE_LIST);
         when(schedulerProvider.getMainScheduler()).thenReturn(Schedulers.trampoline());
         when(schedulerProvider.getIoScheduler()).thenReturn(Schedulers.trampoline());

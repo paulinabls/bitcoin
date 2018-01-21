@@ -3,15 +3,21 @@ package com.psc.bitcoin.presentation.presenter;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 
+import com.db.chart.model.LineSet;
 import com.psc.bitcoin.data.SchedulerProvider;
 import com.psc.bitcoin.domain.model.Price;
 import com.psc.bitcoin.domain.usecase.FetchPricesUseCase;
+import com.psc.bitcoin.domain.usecase.FilterChartDataUseCase;
+import com.psc.bitcoin.presentation.model.Mapper;
+import com.psc.bitcoin.presentation.model.LabeledValue;
 import com.psc.bitcoin.presentation.presenter.base.Presenter;
 
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
+import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 
 public class PricePresenter implements Presenter<PriceView> {
@@ -22,9 +28,11 @@ public class PricePresenter implements Presenter<PriceView> {
     private Disposable fetchSubscription;
     private Disposable filterSubscription;
     private List<Price> list = Collections.emptyList();
+    private FilterChartDataUseCase filterDataUseCase;
 
-    public PricePresenter(FetchPricesUseCase fetchPricesUseCase, SchedulerProvider schedulerProvider) {
+    public PricePresenter(FetchPricesUseCase fetchPricesUseCase, FilterChartDataUseCase filterDataUseCase, SchedulerProvider schedulerProvider) {
         this.fetchPricesUseCase = fetchPricesUseCase;
+        this.filterDataUseCase = filterDataUseCase;
         this.schedulerProvider = schedulerProvider;
     }
 
@@ -33,9 +41,8 @@ public class PricePresenter implements Presenter<PriceView> {
         this.view = view;
         if (list.isEmpty()) {
             fetchPrices();
-        }
-        else {
-            view.setData(list);
+        } else {
+            setListAndHideSpinner(list);
         }
     }
 
@@ -74,8 +81,25 @@ public class PricePresenter implements Presenter<PriceView> {
         if (view == null) {
             return;
         }
-        view.setData(prices);
+//        view.setData(prices);
+        view.setChartData(toLineSet(prices));
         view.hideLoadingSpinner();
+        }
+
+    private LineSet toLineSet(List<Price> prices) {
+        LineSet set = new LineSet();
+
+        FilterChartDataUseCase.Param param = new FilterChartDataUseCase.Param();
+        param.dateFormat = Mapper.MONTH_YEAR;
+        param.prices =prices;
+        param.valuesLimit = prices.size();
+        param.maxDisplayedLabelsCount = 8;
+        filterDataUseCase.execute(param)
+                .subscribeOn(schedulerProvider.getIoScheduler())
+                .observeOn(schedulerProvider.getMainScheduler())
+                .subscribe(point -> set.addPoint(point.getLabel(), point.getValue()));
+
+        return set;
     }
 
     @NonNull

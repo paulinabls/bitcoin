@@ -29,6 +29,7 @@ ext {
     rxjava_adapter = '1.0.0'
     okhttp = '3.6.0'
     room = '1.0.0'
+    williamChart = "2.5.0"
 
     junit = '4.12'
     mockito = '2.8.9'
@@ -48,6 +49,7 @@ dependencies {
     implementation "com.squareup.okhttp3:logging-interceptor:$okhttp"
     implementation "android.arch.persistence.room:runtime:$room"
     implementation "android.arch.persistence.room:rxjava2:$room"
+    implementation "com.diogobernardino:williamchart:" + williamChart
     annotationProcessor "android.arch.persistence.room:compiler:$room"
 
     testImplementation "junit:junit:$junit"

@@ -7,17 +7,6 @@
     android:layout_height="match_parent"
     tools:activity="com.psc.bitcoin.presentation.view.MainActivity">
 
-    <EditText
-        android:id="@+id/search_query_edit_text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_toLeftOf="@+id/loading_spinner"
-        android:backgroundTint="@color/colorPrimary"
-        android:hint="Type here to filter by name"
-        android:imeOptions="flagNoExtractUi"
-        android:inputType="textNoSuggestions"
-        android:maxLines="1"/>
-
     <ProgressBar
         android:id="@+id/loading_spinner"
         android:layout_width="50dp"
@@ -28,13 +17,18 @@
         android:indeterminateTint="@color/colorPrimary"
         android:visibility="invisible"
         />
+    <com.db.chart.view.LineChartView
+        android:id="@+id/linechart"
+        android:layout_below="@id/loading_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="8dp"
-        android:layout_below="@id/search_query_edit_text"
+        android:layout_below="@id/linechart"
         app:layoutManager="LinearLayoutManager"
         tools:listitem="@layout/item_list"/>
 

@@ -10,7 +10,9 @@ import com.psc.bitcoin.data.network.BlockchainApi;
 import com.psc.bitcoin.data.store.Storage;
 import com.psc.bitcoin.domain.Repository;
 import com.psc.bitcoin.domain.usecase.FetchPricesUseCase;
+import com.psc.bitcoin.domain.usecase.FilterChartDataUseCase;
 import com.psc.bitcoin.domain.utils.CalendarUtils;
+import com.psc.bitcoin.presentation.model.MapperFactory;
 import com.psc.bitcoin.presentation.presenter.PricePresenter;
 import com.psc.bitcoin.presentation.presenter.base.PresenterFactory;
 
@@ -25,8 +27,9 @@ class PricePresenterFactory implements PresenterFactory<PricePresenter> {
         final Repository repository = new BitcoinRepository(punkService, storage, new PriceMapper(), schedulerProvider);
         final CalendarUtils calendarUtils = new CalendarUtils();
         final FetchPricesUseCase fetchPricesUseCase = new FetchPricesUseCase(repository, calendarUtils);
+        final FilterChartDataUseCase filterChartDataUseCase = new FilterChartDataUseCase(new MapperFactory());
 
-        return new PricePresenter(fetchPricesUseCase, schedulerProvider);
+        return new PricePresenter(fetchPricesUseCase, filterChartDataUseCase, schedulerProvider);
     }
 
 }
