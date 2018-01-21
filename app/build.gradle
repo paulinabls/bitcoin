@@ -23,7 +23,6 @@ android {
 }
 
 ext {
-    recycler_view = '26.1.0'
     retrofit = '2.3.0'
     rxjava = '2.0.1'
     rxjava_adapter = '1.0.0'
@@ -39,7 +38,6 @@ ext {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation "com.android.support:recyclerview-v7:$recycler_view"
     implementation "com.squareup.retrofit2:retrofit:$retrofit"
     implementation "com.squareup.retrofit2:converter-gson:$retrofit"
     implementation "com.jakewharton.retrofit:retrofit2-rxjava2-adapter:$rxjava_adapter"
@@ -53,6 +51,7 @@ dependencies {
     annotationProcessor "android.arch.persistence.room:compiler:$room"
 
     testImplementation "junit:junit:$junit"
+    testImplementation "com.diogobernardino:williamchart:" + williamChart
     androidTestImplementation("com.android.support.test.espresso:espresso-core:$espresso", {
         exclude group: 'com.android.support', module: 'support-annotations'
     })

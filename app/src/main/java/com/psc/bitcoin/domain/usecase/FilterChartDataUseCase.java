@@ -20,16 +20,17 @@ public class FilterChartDataUseCase implements UseCase<FilterChartDataUseCase.Pa
     @Override
     public Observable<LabeledValue> execute(Param param) {
         Mapper mapper = mapperFactory.createWith(param.dateFormat);
-        int noLabelRange = param.valuesLimit/ param.maxDisplayedLabelsCount;
+        int noLabelRange = param.valuesLimit / param.maxDisplayedLabelsCount;
         return Observable.fromIterable(param.prices)
+                .sorted((p1, p2) -> Long.compare(p1.getUnixTime(), p2.getUnixTime()))
                 .takeLast(param.valuesLimit)
                 .zipWith(Observable.range(0, param.valuesLimit),
                         (price, integer) -> {
-                    if (integer % noLabelRange == 0) {
-                        return mapper.withDateLabel(price);
-                    }
-                    return mapper.withEmptyLabel(price);
-                });
+                            if (noLabelRange == 0 || (integer % noLabelRange) == 0) {
+                                return mapper.withDateLabel(price);
+                            }
+                            return mapper.withEmptyLabel(price);
+                        });
     }
 
     public static class Param {

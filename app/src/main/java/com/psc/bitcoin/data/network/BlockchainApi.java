@@ -11,7 +11,4 @@ public interface BlockchainApi {
     @GET("charts/market-price")
     Observable<MarketPriceResponse> getPrices(@Query("timespan") String timespan, @Query("format") String format);
 
-    @GET("charts/market-price?timespan=all&sampled=false")
-    Observable<MarketPriceResponse> getAllPrices(@Query("format") String format);
-
 }

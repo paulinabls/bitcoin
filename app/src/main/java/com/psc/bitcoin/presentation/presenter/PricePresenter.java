@@ -8,16 +8,14 @@ import com.psc.bitcoin.data.SchedulerProvider;
 import com.psc.bitcoin.domain.model.Price;
 import com.psc.bitcoin.domain.usecase.FetchPricesUseCase;
 import com.psc.bitcoin.domain.usecase.FilterChartDataUseCase;
-import com.psc.bitcoin.presentation.model.Mapper;
 import com.psc.bitcoin.presentation.model.LabeledValue;
+import com.psc.bitcoin.presentation.model.Mapper;
 import com.psc.bitcoin.presentation.presenter.base.Presenter;
 
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
-import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 
 public class PricePresenter implements Presenter<PriceView> {
@@ -29,6 +27,7 @@ public class PricePresenter implements Presenter<PriceView> {
     private Disposable filterSubscription;
     private List<Price> list = Collections.emptyList();
     private FilterChartDataUseCase filterDataUseCase;
+    private int recentRange = -1;
 
     public PricePresenter(FetchPricesUseCase fetchPricesUseCase, FilterChartDataUseCase filterDataUseCase, SchedulerProvider schedulerProvider) {
         this.fetchPricesUseCase = fetchPricesUseCase;
@@ -40,9 +39,10 @@ public class PricePresenter implements Presenter<PriceView> {
     public void onViewAttached(final PriceView view) {
         this.view = view;
         if (list.isEmpty()) {
+            view.showLoadingSpinner();
             fetchPrices();
         } else {
-            setListAndHideSpinner(list);
+            setDataAndHideSpinner(list);
         }
     }
 
@@ -74,32 +74,39 @@ public class PricePresenter implements Presenter<PriceView> {
         }
         list = prices;
 
-        setListAndHideSpinner(prices);
+        setDataAndHideSpinner(prices);
     }
 
-    private void setListAndHideSpinner(List<Price> prices) {
+    private void setDataAndHideSpinner(List<Price> prices) {
         if (view == null) {
             return;
         }
-//        view.setData(prices);
-        view.setChartData(toLineSet(prices));
-        view.hideLoadingSpinner();
-        }
+        filterRange(prices, recentRange);
+    }
 
-    private LineSet toLineSet(List<Price> prices) {
-        LineSet set = new LineSet();
-
+    private void filterRange(List<Price> prices, int rangeLimit) {
         FilterChartDataUseCase.Param param = new FilterChartDataUseCase.Param();
-        param.dateFormat = Mapper.MONTH_YEAR;
-        param.prices =prices;
-        param.valuesLimit = prices.size();
+        param.valuesLimit = rangeLimit == -1 ? list.size() : rangeLimit;
+        param.dateFormat = param.valuesLimit > 30 ? Mapper.MONTH_YEAR : Mapper.DAY_MONTH;
+        param.prices = prices;
         param.maxDisplayedLabelsCount = 8;
-        filterDataUseCase.execute(param)
+        filter(param);
+    }
+
+    private void filter(FilterChartDataUseCase.Param param) {
+        filterSubscription = filterDataUseCase.execute(param)
                 .subscribeOn(schedulerProvider.getIoScheduler())
                 .observeOn(schedulerProvider.getMainScheduler())
-                .subscribe(point -> set.addPoint(point.getLabel(), point.getValue()));
+                .toList()
+                .subscribe(this::setChartDataAndHideSpinner, e -> onError(e.getMessage()));
+    }
 
-        return set;
+    private void setChartDataAndHideSpinner(List<LabeledValue> list) {
+        if (view == null) {
+            return;
+        }
+        view.setChartData(list);
+        view.hideLoadingSpinner();
     }
 
     @NonNull
@@ -119,4 +126,18 @@ public class PricePresenter implements Presenter<PriceView> {
         view.displayErrorMessage(message);
     }
 
+    /**
+     * when -1 passed all data will be displayed
+     *
+     * @param range in days to be displayed
+     */
+    public void onRangeSelected(int range) {
+        if (list.isEmpty()) {
+            return;
+        }
+        view.showLoadingSpinner();
+
+        recentRange = range;
+        filterRange(list, range);
+    }
 }

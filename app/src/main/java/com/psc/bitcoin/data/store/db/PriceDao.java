@@ -18,9 +18,6 @@ public interface PriceDao {
     @Query("SELECT * FROM prices")
     Flowable<List<PriceEntity>> getPrices();
 
-//    @Insert(onConflict = OnConflictStrategy.REPLACE)
-//    void insertPrice(PriceEntity price);
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(PriceEntity... items);
 

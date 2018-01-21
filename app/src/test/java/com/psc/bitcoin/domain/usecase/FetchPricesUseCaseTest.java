@@ -11,8 +11,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.LinkedList;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -26,8 +28,8 @@ import static org.mockito.Mockito.when;
 public class FetchPricesUseCaseTest {
 
     private static final Calendar currentDate = Calendar.getInstance();
-    private static final List<Price> TWO_ITEMS_LIST = Arrays.asList(new Price(4, 3f), new Price(2, 3f));
-    private static final List<Price> ONE_ITEM_PRICE_LIST = Arrays.asList(new Price(1, 2f));
+    private static final List<Price> TWO_ITEMS_LIST =new ArrayList<>( Arrays.asList(new Price(4, 3f), new Price(2, 3f)));
+    private static final List<Price> ONE_ITEM_PRICE_LIST =  new ArrayList<>(Arrays.asList(new Price(1, 2f)));
     @Mock
     Repository repository;
     @Mock
@@ -36,7 +38,7 @@ public class FetchPricesUseCaseTest {
     private FetchPricesUseCase tested;
     private Calendar lastFetchedDate;
     private Observable<List<Price>> listObservable;
-    private Observable<List<Price>> allStoredPrices = Observable.empty();
+    private Observable<List<Price>> allStoredPrices = Observable.just(new LinkedList<>());
     private Observable<List<Price>> fetchedPrices;
 
     @Before
@@ -67,6 +69,7 @@ public class FetchPricesUseCaseTest {
 
         order.verify(repository).getLastFetchedDate();
         order.verify(repository).fetchAllPrices();
+        order.verify(repository).fetchPrices(30);
         order.verify(repository).storePrices(ONE_ITEM_PRICE_LIST);
         order.verify(repository).storeLastFetchedDate(currentDate);
         order.verify(repository).getAllPrices();

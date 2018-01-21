@@ -1,9 +1,11 @@
 package com.psc.bitcoin.presentation.model;
 
+import com.db.chart.model.LineSet;
 import com.psc.bitcoin.domain.model.Price;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 public class Mapper {
     public static final String MONTH_YEAR = "MMM''yy";
@@ -22,5 +24,13 @@ public class Mapper {
 
     public LabeledValue withEmptyLabel(Price p) {
         return new LabeledValue("", p.getValue());
+    }
+
+    public static LineSet toLineSet(List<LabeledValue> valueList) {
+        final LineSet lineSet = new LineSet();
+        for (LabeledValue value : valueList) {
+            lineSet.addPoint(value.getLabel(), value.getValue());
+        }
+        return lineSet;
     }
 }

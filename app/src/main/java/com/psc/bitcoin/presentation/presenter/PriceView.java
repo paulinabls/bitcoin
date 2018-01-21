@@ -1,14 +1,12 @@
 package com.psc.bitcoin.presentation.presenter;
 
-import com.db.chart.model.LineSet;
-import com.psc.bitcoin.domain.model.Price;
+import com.psc.bitcoin.presentation.model.LabeledValue;
 
 import java.util.List;
 
 public interface PriceView {
-    void setData(List<Price> list);
 
-    void setChartData(LineSet set);
+    void setChartData(List<LabeledValue> valueList);
 
     void showLoadingSpinner();
 

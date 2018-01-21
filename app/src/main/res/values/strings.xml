@@ -1,3 +1,20 @@
 <resources>
     <string name="app_name">BitcoinMarket</string>
+
+    <string-array name="range_array">
+        <item>All</item>
+        <item>180 days</item>
+        <item>90 days</item>
+        <item>30 days</item>
+        <item>7 days</item>
+    </string-array>
+
+   <!-- needs to be kept in sync with R.arrays.range_array-->
+    <integer-array name="range_values_array">
+        <item>-1</item>
+        <item>180</item>
+        <item>90</item>
+        <item>30</item>
+        <item>7</item>
+    </integer-array>
 </resources>
