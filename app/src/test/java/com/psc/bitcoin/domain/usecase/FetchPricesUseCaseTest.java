@@ -1,13 +1,14 @@
 package com.psc.bitcoin.domain.usecase;
 
-import com.psc.bitcoin.data.SchedulerProvider;
 import com.psc.bitcoin.domain.Repository;
 import com.psc.bitcoin.domain.model.Price;
 import com.psc.bitcoin.domain.utils.CalendarUtils;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
@@ -16,10 +17,8 @@ import java.util.List;
 
 import io.reactivex.Observable;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,8 +32,7 @@ public class FetchPricesUseCaseTest {
     Repository repository;
     @Mock
     CalendarUtils calendarUtils;
-    @Mock
-    SchedulerProvider schedulerProvider;
+
     private FetchPricesUseCase tested;
     private Calendar lastFetchedDate;
     private Observable<List<Price>> listObservable;
@@ -45,8 +43,7 @@ public class FetchPricesUseCaseTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        tested = new FetchPricesUseCase(repository, calendarUtils, schedulerProvider);
-        allStoredPrices = Observable.empty();
+        tested = new FetchPricesUseCase(repository, calendarUtils);
     }
 
     private void setUpRepository() {
@@ -60,16 +57,19 @@ public class FetchPricesUseCaseTest {
     public void whenLastFetchedDateIsNull_shouldFetchAllPrices_storeThem_andStoreDate() throws Exception {
         lastFetchedDate = null;
         listObservable = Observable.just(ONE_ITEM_PRICE_LIST);
+        fetchedPrices = Observable.just(TWO_ITEMS_LIST);
 
         setUpRepository();
 
         tested.execute(currentDate).subscribe();
 
-        verify(repository).getLastFetchedDate();
-        verify(repository).fetchAllPrices();
-        verify(repository).storePrices(ONE_ITEM_PRICE_LIST);
-        verify(repository).storeLastFetchedDate(currentDate);
-        verify(repository).getAllPrices();
+        InOrder order = Mockito.inOrder(repository);
+
+        order.verify(repository).getLastFetchedDate();
+        order.verify(repository).fetchAllPrices();
+        order.verify(repository).storePrices(ONE_ITEM_PRICE_LIST);
+        order.verify(repository).storeLastFetchedDate(currentDate);
+        order.verify(repository).getAllPrices();
     }
 
     @Test
@@ -82,12 +82,13 @@ public class FetchPricesUseCaseTest {
 
         tested.execute(currentDate).subscribe();
 
-        verify(calendarUtils).calculateDifferenceInDays(currentDate, lastFetchedDate);
-        verify(repository).getLastFetchedDate();
-        verify(repository).fetchPrices(1);
-        verify(repository).storePrices(TWO_ITEMS_LIST);
-        verify(repository).storeLastFetchedDate(currentDate);
-        verify(repository).getAllPrices();
+        InOrder order = Mockito.inOrder(repository, calendarUtils);
+        order.verify(repository).getLastFetchedDate();
+        order.verify(calendarUtils).calculateDifferenceInDays(currentDate, lastFetchedDate);
+        order.verify(repository).fetchPrices(1);
+        order.verify(repository).storePrices(TWO_ITEMS_LIST);
+        order.verify(repository).storeLastFetchedDate(currentDate);
+        order.verify(repository).getAllPrices();
     }
 
     @Test
@@ -100,10 +101,12 @@ public class FetchPricesUseCaseTest {
 
         tested.execute(currentDate).subscribe();
 
-        verify(repository).getLastFetchedDate();
-        verify(calendarUtils).calculateDifferenceInDays(currentDate, lastFetchedDate);
+        InOrder order = Mockito.inOrder(repository, calendarUtils);
+
+        order.verify(repository).getLastFetchedDate();
+        order.verify(calendarUtils).calculateDifferenceInDays(currentDate, lastFetchedDate);
         verify(repository, never()).storePrices(anyList());
         verify(repository, never()).storeLastFetchedDate(currentDate);
-        verify(repository).getAllPrices();
+        order.verify(repository).getAllPrices();
     }
 }

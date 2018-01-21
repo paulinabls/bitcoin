@@ -24,7 +24,7 @@ class PricePresenterFactory implements PresenterFactory<PricePresenter> {
         final SchedulerProvider schedulerProvider = new SchedulerProvider();
         final Repository repository = new BitcoinRepository(punkService, storage, new PriceMapper(), schedulerProvider);
         final CalendarUtils calendarUtils = new CalendarUtils();
-        final FetchPricesUseCase fetchPricesUseCase = new FetchPricesUseCase(repository, calendarUtils, schedulerProvider);
+        final FetchPricesUseCase fetchPricesUseCase = new FetchPricesUseCase(repository, calendarUtils);
 
         return new PricePresenter(fetchPricesUseCase, schedulerProvider);
     }

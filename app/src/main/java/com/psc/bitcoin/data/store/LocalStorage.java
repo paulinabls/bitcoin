@@ -6,6 +6,7 @@ import com.psc.bitcoin.data.store.db.PriceEntity;
 import com.psc.bitcoin.domain.model.Price;
 
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -41,6 +42,9 @@ public class LocalStorage implements Storage {
 
     @Override
     public Observable<List<Price>> getAllPrices() {
-        return null;
+        return priceDao.getPrices()
+                .defaultIfEmpty(Collections.emptyList())
+                .map(entityMapper::fromEntities)
+                .toObservable();
     }
 }

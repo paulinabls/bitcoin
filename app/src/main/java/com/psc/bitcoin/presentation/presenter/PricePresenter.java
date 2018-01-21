@@ -8,6 +8,7 @@ import com.psc.bitcoin.domain.model.Price;
 import com.psc.bitcoin.domain.usecase.FetchPricesUseCase;
 import com.psc.bitcoin.presentation.presenter.base.Presenter;
 
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
@@ -80,7 +81,7 @@ public class PricePresenter implements Presenter<PriceView> {
     @NonNull
     private void fetchPrices() {
         fetchSubscription = fetchPricesUseCase
-                .execute(null)
+                .execute(Calendar.getInstance())
                 .subscribeOn(schedulerProvider.getIoScheduler())
                 .observeOn(schedulerProvider.getMainScheduler())
                 .subscribe(this::onPricesReceived, e -> onError(e.getMessage()));

@@ -16,4 +16,12 @@ public class Price {
     public float getValue() {
         return value;
     }
+
+    @Override
+    public String toString() {
+        return "Price{" +
+                "unixTime=" + unixTime +
+                ", value=" + value +
+                '}';
+    }
 }
